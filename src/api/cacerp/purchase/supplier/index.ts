@@ -49,5 +49,10 @@ export const CacErpSupplierApi = {
   // 导出供应商 Excel
   exportCacErpSupplier: async (params) => {
     return await request.download({ url: `/cacerp/purchase/supplier/export-excel`, params })
-  }
+  },
+
+  // 获得供应商精简列表
+  getSupplierSimpleList: async () => {
+    return await request.get({ url: `/cacerp/purchase/supplier/simple-list` })
+  },
 }

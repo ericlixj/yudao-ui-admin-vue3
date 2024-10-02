@@ -8,28 +8,19 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="名称" prop="name">
+      <el-form-item label="请购单编码" prop="reqPurchaseCode">
         <el-input
-          v-model="queryParams.name"
-          placeholder="请输入名称"
+          v-model="queryParams.reqPurchaseCode"
+          placeholder="请输入请购单编码"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="产品编码" prop="prodCode">
-        <el-input
-          v-model="queryParams.prodCode"
-          placeholder="请输入产品编码"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="状态" prop="status">
+      <el-form-item label="请购单状态" prop="status">
         <el-select
           v-model="queryParams.status"
-          placeholder="请选择status"
+          placeholder="请选择请购单状态"
           clearable
           class="!w-240px"
         >
@@ -41,6 +32,28 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item label="预期交付时间" prop="expectDeliveryTime">
+        <el-date-picker
+          v-model="queryParams.expectDeliveryTime"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          type="daterange"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-220px"
+        />
+      </el-form-item>
+      <el-form-item label="create_time" prop="createTime">
+        <el-date-picker
+          v-model="queryParams.createTime"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          type="daterange"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-220px"
+        />
+      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -48,7 +61,7 @@
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['cacerp:product:create']"
+          v-hasPermi="['cacerp:purchase-req-order:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -57,7 +70,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['cacerp:product:export']"
+          v-hasPermi="['cacerp:purchase-req-order:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -67,21 +80,31 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+    <el-table
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      highlight-current-row
+      @current-change="handleCurrentChange"
+    >
       <el-table-column label="id" align="center" prop="id" />
-      <el-table-column label="名称" align="center" prop="name" />
-      <el-table-column label="供应商" align="center" prop="supplierName" />
-      <el-table-column label="产品编码" align="center" prop="prodCode" />
-      <el-table-column label="形式" align="center" prop="form" />
-      <el-table-column label="数量" align="center" prop="count" />
-      <el-table-column label="状态" align="center" prop="status">
+      <el-table-column label="请购单编码" align="center" prop="reqPurchaseCode" />
+      <el-table-column label="请购单状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="采购价" align="center" prop="purchasePrice" />
       <el-table-column
-        label="创建时间"
+        label="预期交付时间"
+        align="center"
+        prop="expectDeliveryTime"
+        :formatter="dateFormatter"
+        width="180px"
+      />
+      <el-table-column label="备注" align="center" prop="remark" />
+      <el-table-column
+        label="create_time"
         align="center"
         prop="createTime"
         :formatter="dateFormatter"
@@ -93,7 +116,7 @@
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['cacerp:product:update']"
+            v-hasPermi="['cacerp:purchase-req-order:update']"
           >
             编辑
           </el-button>
@@ -101,7 +124,7 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['cacerp:product:delete']"
+            v-hasPermi="['cacerp:purchase-req-order:delete']"
           >
             删除
           </el-button>
@@ -118,31 +141,41 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <ProductForm ref="formRef" @success="getList" />
+  <PurchaseReqOrderForm ref="formRef" @success="getList" />
+  <!-- 子表的列表 -->
+  <ContentWrap>
+    <el-tabs model-value="purchaseReqOrderItems">
+      <el-tab-pane label="请购单产品明细" name="purchaseReqOrderItems">
+        <PurchaseReqOrderItemsList :req-purchase-code="currentRow.id" />
+      </el-tab-pane>
+    </el-tabs>
+  </ContentWrap>
 </template>
 
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import { ProductApi, ProductVO } from '@/api/cacerp/purchase/product'
-import ProductForm from './ProductForm.vue'
+import { PurchaseReqOrderApi, PurchaseReqOrderVO } from '@/api/cacerp/purchase/purchaseReqOrder'
+import PurchaseReqOrderForm from './PurchaseReqOrderForm.vue'
+import PurchaseReqOrderItemsList from './components/PurchaseReqOrderItemsList.vue'
 
-/** 产品管理 列表 */
-defineOptions({ name: 'Product' })
+/** 请购单 列表 */
+defineOptions({ name: 'PurchaseReqOrder' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref<ProductVO[]>([]) // 列表的数据
+const list = ref<PurchaseReqOrderVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  name: undefined,
-  prodCode: undefined,
-  status: undefined
+  reqPurchaseCode: undefined,
+  status: undefined,
+  expectDeliveryTime: [],
+  createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
@@ -151,7 +184,7 @@ const exportLoading = ref(false) // 导出的加载中
 const getList = async () => {
   loading.value = true
   try {
-    const data = await ProductApi.getProductPage(queryParams)
+    const data = await PurchaseReqOrderApi.getPurchaseReqOrderPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -183,7 +216,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await ProductApi.deleteProduct(id)
+    await PurchaseReqOrderApi.deletePurchaseReqOrder(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -197,12 +230,18 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await ProductApi.exportProduct(queryParams)
-    download.excel(data, '产品管理.xls')
+    const data = await PurchaseReqOrderApi.exportPurchaseReqOrder(queryParams)
+    download.excel(data, '请购单.xls')
   } catch {
   } finally {
     exportLoading.value = false
   }
+}
+
+/** 选中行操作 */
+const currentRow = ref({}) // 选中行
+const handleCurrentChange = (row) => {
+  currentRow.value = row
 }
 
 /** 初始化 **/

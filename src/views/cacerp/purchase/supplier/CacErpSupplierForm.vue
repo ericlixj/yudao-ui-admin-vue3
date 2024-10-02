@@ -67,6 +67,7 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { CacErpSupplierApi, CacErpSupplierVO } from '@/api/cacerp/purchase/supplier'
+import { CommonStatusEnum } from '@/utils/constants'
 
 /** 供应商 表单 */
 defineOptions({ name: 'CacErpSupplierForm' })
@@ -87,7 +88,7 @@ const formData = ref({
   email: undefined,
   fax: undefined,
   remark: undefined,
-  status: undefined,
+  status: CommonStatusEnum.ENABLE,
   sort: undefined,
   taxNo: undefined,
   taxPercent: undefined,
@@ -155,7 +156,7 @@ const resetForm = () => {
     email: undefined,
     fax: undefined,
     remark: undefined,
-    status: undefined,
+    status: CommonStatusEnum.ENABLE,
     sort: undefined,
     taxNo: undefined,
     taxPercent: undefined,

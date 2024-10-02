@@ -226,5 +226,14 @@ export enum DICT_TYPE {
   AI_WRITE_LENGTH = 'ai_write_length', // AI 写作长度
   AI_WRITE_FORMAT = 'ai_write_format', // AI 写作格式
   AI_WRITE_TONE = 'ai_write_tone', // AI 写作语气
-  AI_WRITE_LANGUAGE = 'ai_write_language' // AI 写作语言
+  AI_WRITE_LANGUAGE = 'ai_write_language', // AI 写作语言
+
+  // ========== cacerp ==========
+  PALLET_TYPE = 'pallet_type', // 托盘类型
+  PROD_FORM = 'prod_form', // 产品形式
+  PURCHASE_SOURCE_CODE = 'purchase_source_code', // 采购来源编码
+
+
+
+
 }

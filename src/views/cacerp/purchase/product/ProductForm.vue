@@ -11,7 +11,20 @@
         <el-input v-model="formData.name" placeholder="请输入名称" />
       </el-form-item>
       <el-form-item label="供应商" prop="supplierId">
-        <el-input v-model="formData.supplierId" placeholder="请输入供应商" />
+            <el-select
+              v-model="formData.supplierId"
+              clearable
+              filterable
+              placeholder="请选择供应商"
+              class="!w-1/1"
+            >
+              <el-option
+                v-for="item in supplierList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
       </el-form-item>
       <el-form-item label="产品编码" prop="prodCode">
         <el-input v-model="formData.prodCode" placeholder="请输入产品编码" />
@@ -20,7 +33,14 @@
         <el-input v-model="formData.prodDescs" type="textarea" placeholder="请输入产品描述" />
       </el-form-item>
       <el-form-item label="形式" prop="form">
-        <el-input v-model="formData.form" placeholder="请输入形式" />
+        <el-select v-model="formData.form" placeholder="请选择产品形式">
+          <el-option
+            v-for="dict in getStrDictOptions(DICT_TYPE.PROD_FORM)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="数量" prop="count">
         <el-input v-model="formData.count" placeholder="请输入数量" />
@@ -56,8 +76,10 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { getIntDictOptions, DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 import { ProductApi, ProductVO } from '@/api/cacerp/purchase/product'
+import { CacErpSupplierApi, CacErpSupplierVO } from '@/api/cacerp/purchase/supplier'
+import { CommonStatusEnum, SystemMenuTypeEnum } from '@/utils/constants'
 
 /** 产品管理 表单 */
 defineOptions({ name: 'ProductForm' })
@@ -75,9 +97,10 @@ const formData = ref({
   supplierId: undefined,
   prodCode: undefined,
   prodDescs: undefined,
+  prodForm: undefined,
   form: undefined,
   count: undefined,
-  status: undefined,
+  status: CommonStatusEnum.ENABLE,
   remark: undefined,
   purchasePrice: undefined,
   salePrice: undefined,
@@ -90,6 +113,9 @@ const formRules = reactive({
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+/** 供应商下拉框 */
+const supplierList = ref<CacErpSupplierVO[]>([]) // 供应商列表
+
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -106,6 +132,7 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+  supplierList.value = await CacErpSupplierApi.getSupplierSimpleList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -143,7 +170,7 @@ const resetForm = () => {
     prodDescs: undefined,
     form: undefined,
     count: undefined,
-    status: undefined,
+    status: CommonStatusEnum.ENABLE,
     remark: undefined,
     purchasePrice: undefined,
     salePrice: undefined,
@@ -151,4 +178,8 @@ const resetForm = () => {
   }
   formRef.value?.resetFields()
 }
+
+
+
+
 </script>
