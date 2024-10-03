@@ -71,4 +71,7 @@ export const PurchaseReqOrderApi = {
   checkReqPurchaseCodeUnique: async (reqPurchaseCode: string) => {
     return await request.get({ url: `/cacerp/purchase/purchase-req-order/checkReqPurchaseCodeUnique?reqPurchaseCode=` + reqPurchaseCode })
   },
+  importPurchaseReqOrderItemsTemplate : () => {
+    return request.download({ url: '/cacerp/purchase/purchase-req-order/get-import-items-template' })
+  },
 }

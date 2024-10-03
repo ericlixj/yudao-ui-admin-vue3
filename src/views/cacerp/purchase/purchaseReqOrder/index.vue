@@ -6,7 +6,7 @@
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="68px"
+      label-width="100px"
     >
       <el-form-item label="请购单编码" prop="reqPurchaseCode">
         <el-input
@@ -17,35 +17,10 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="请购单状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择请购单状态"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
+
       <el-form-item label="预期交付时间" prop="expectDeliveryTime">
         <el-date-picker
           v-model="queryParams.expectDeliveryTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-220px"
-        />
-      </el-form-item>
-      <el-form-item label="create_time" prop="createTime">
-        <el-date-picker
-          v-model="queryParams.createTime"
           value-format="YYYY-MM-DD HH:mm:ss"
           type="daterange"
           start-placeholder="开始日期"
@@ -146,7 +121,7 @@
   <ContentWrap>
     <el-tabs model-value="purchaseReqOrderItems">
       <el-tab-pane label="请购单产品明细" name="purchaseReqOrderItems">
-        <PurchaseReqOrderItemsList :req-purchase-code="currentRow.id" />
+        <PurchaseReqOrderItemsList :req-purchase-code="currentRow.reqPurchaseCode" />
       </el-tab-pane>
     </el-tabs>
   </ContentWrap>

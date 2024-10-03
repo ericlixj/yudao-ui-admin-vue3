@@ -4,7 +4,7 @@
       ref="formRef"
       :model="formData"
       :rules="formRules"
-      label-width="100px"
+      label-width="110px"
       v-loading="formLoading"
     >
        <el-form-item label="产品编码" prop="prodCode">
@@ -14,7 +14,7 @@
         <el-input v-model="formData.prodName" placeholder="请输入产品名称" />
       </el-form-item>
       <el-form-item label="产品描述" prop="prodDesc">
-        <el-input v-model="formData.prodDesc" placeholder="请输入产品描述" />
+        <el-input v-model="formData.prodDesc" type="textarea" placeholder="请输入产品描述" />
       </el-form-item>
       <el-form-item label="产品形式" prop="prodForm">
         <el-select v-model="formData.prodForm" placeholder="请选择产品形式">

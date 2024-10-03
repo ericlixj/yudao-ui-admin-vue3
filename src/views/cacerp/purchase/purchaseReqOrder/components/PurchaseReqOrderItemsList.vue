@@ -9,6 +9,14 @@
     >
       <Icon icon="ep:plus" class="mr-5px" /> 新增
     </el-button>
+    <el-button
+      type="warning"
+      plain
+      @click="handleImport"
+      v-hasPermi="['cacerp:purchase-req-order:import']"
+    >
+      <Icon icon="ep:upload" /> 导入
+    </el-button>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="id" align="center" prop="id" />
        <el-table-column label="产品编码" align="center" prop="prodCode" />
@@ -64,12 +72,17 @@
   </ContentWrap>
     <!-- 表单弹窗：添加/修改 -->
     <PurchaseReqOrderItemsForm ref="formRef" @success="getList" />
+    <!-- 用户导入对话框 -->
+    <PurchaseReqOrderItemsImportForm ref="importFormRef"
+    @success="getList"
+    :req-purchase-code="queryParams.reqPurchaseCode"/>
 </template>
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { PurchaseReqOrderApi } from '@/api/cacerp/purchase/purchaseReqOrder'
 import PurchaseReqOrderItemsForm from './PurchaseReqOrderItemsForm.vue'
+import PurchaseReqOrderItemsImportForm from './PurchaseReqOrderItemsImportForm.vue'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -139,4 +152,17 @@ const handleDelete = async (id: number) => {
     await getList()
   } catch {}
 }
+/** 用户导入 */
+const importFormRef = ref()
+const handleImport = () => {
+  if (!props.reqPurchaseCode) {
+    message.error('请选择一个请购单')
+    return
+  }
+  importFormRef.value.open()
+}
+
+
+
+
 </script>
