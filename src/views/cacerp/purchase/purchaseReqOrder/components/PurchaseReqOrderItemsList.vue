@@ -88,7 +88,7 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const props = defineProps<{
-  reqPurchaseCode?: number // 请购单编码（主表的关联字段）
+  reqPurchaseCode?: string // 请购单编码（主表的关联字段）
 }>()
 const loading = ref(false) // 列表的加载中
 const list = ref([]) // 列表的数据
@@ -96,7 +96,7 @@ const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  reqPurchaseCode: undefined as unknown
+  reqPurchaseCode: ''
 })
 
 /** 监听主表的关联字段的变化，加载对应的子表数据 */

@@ -94,17 +94,27 @@ const submitFormSuccess = (response: any) => {
   const data = response.data
   let text = '上传成功数量：' + data.createProdStrs.length + ';'
   for (let username of data.createProdStrs) {
-    text += '< ' + username + ' >'
+    text += '<br>&nbsp;&nbsp;< ' + username + ' >'
   }
+  text += '<br>'
   text += '更新成功数量：' + data.updateProdStrs.length + ';'
   for (const username of data.updateProdStrs) {
-    text += '< ' + username + ' >'
+    text += '<br>&nbsp;&nbsp;< ' + username + ' >'
   }
+  text += '<br>'
   text += '更新失败数量：' + Object.keys(data.failureProdStrs).length + ';'
   for (const username in data.failureProdStrs) {
-    text += '< ' + username + ': ' + data.failureProdStrs[username] + ' >'
+    text += '<br>&nbsp;&nbsp;< ' + username + ': ' + data.failureProdStrs[username] + ' >'
   }
-  message.alert(text)
+  ElMessageBox.alert(
+    text, // 使用 <br> 标签来换行
+    '导入结果',
+    {
+      dangerouslyUseHTMLString: true,  // 启用 HTML 字符串支持
+      confirmButtonText: '确定',
+      type: 'info'
+    }
+  )
   formLoading.value = false
   dialogVisible.value = false
   // 发送操作成功的事件
@@ -137,17 +147,7 @@ const importTemplate = async () => {
 }
 
 const props = defineProps<{
-  reqPurchaseCode: number
+  reqPurchaseCode: string
 }>()
 
-watch(
-  () => props.reqPurchaseCode,
-  (newValue) => {
-    if (newValue) {
-      console.log('接收到新的 reqPurchaseCode:', newValue)
-      // 进行进一步处理，比如根据这个属性进行查询等
-    }
-  },
-  { immediate: true }
-)
 </script>

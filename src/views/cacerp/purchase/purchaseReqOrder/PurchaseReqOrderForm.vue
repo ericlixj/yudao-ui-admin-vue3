@@ -24,7 +24,7 @@
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
-            :label="dict.value"
+            :value="dict.value"
           >
             {{ dict.label }}
           </el-radio>
@@ -94,18 +94,20 @@ const submitForm = async () => {
   // 校验表单
   await formRef.value.validate()
 
-  //reqPurchaseCode唯一性验证
-  const isUnique = await checkReqPurchaseCodeIsUnique()
-  if (!isUnique) {
-    message.error('请购单编码【'+ formData.value.reqPurchaseCode +'】已存在，请重新生成!')
-    return
-  }
+
 
   // 提交请求
   formLoading.value = true
   try {
     const data = formData.value as unknown as PurchaseReqOrderVO
     if (formType.value === 'create') {
+    //reqPurchaseCode唯一性验证
+      const isUnique = await checkReqPurchaseCodeIsUnique()
+      if (!isUnique) {
+        message.error('请购单编码【'+ formData.value.reqPurchaseCode +'】已存在，请重新生成!')
+        return
+      }
+
       await PurchaseReqOrderApi.createPurchaseReqOrder(data)
       message.success(t('common.createSuccess'))
     } else {
