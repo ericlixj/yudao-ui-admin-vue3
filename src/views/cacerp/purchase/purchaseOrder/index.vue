@@ -6,7 +6,7 @@
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="68px"
+      label-width="85px"
     >
       <el-form-item label="请购单编码" prop="reqPurchaseCode">
         <el-input
@@ -41,17 +41,7 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="运输日期" prop="shipmentDate">
-        <el-date-picker
-          v-model="queryParams.shipmentDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-220px"
-        />
-      </el-form-item>
+
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -94,18 +84,17 @@
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="扩展信息" align="center" prop="extInfo" />
       <el-table-column
-        label="create_time"
+        label="预期运输时间"
         align="center"
-        prop="createTime"
+        prop="shipmentDate"
         :formatter="dateFormatter"
         width="180px"
       />
       <el-table-column
-        label="运输日期"
+        label="创建时间"
         align="center"
-        prop="shipmentDate"
+        prop="createTime"
         :formatter="dateFormatter"
         width="180px"
       />
@@ -143,9 +132,12 @@
   <PurchaseOrderForm ref="formRef" @success="getList" />
   <!-- 子表的列表 -->
   <ContentWrap>
-    <el-tabs model-value="purchaseOrderItems">
+    <el-tabs model-value="purchaseOrderEtaItems">
       <el-tab-pane label="采购单产品明细" name="purchaseOrderItems">
         <PurchaseOrderItemsList :po-num="currentRow.id" />
+      </el-tab-pane>
+      <el-tab-pane label="采购单交付批次明细" name="purchaseOrderEtaItems">
+        <PurchaseOrderEtaItemsList :po-num="currentRow.id" />
       </el-tab-pane>
     </el-tabs>
   </ContentWrap>
@@ -157,9 +149,10 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { PurchaseOrderApi, PurchaseOrderVO } from '@/api/cacerp/purchase/purchaseOrder'
 import PurchaseOrderForm from './PurchaseOrderForm.vue'
+import PurchaseOrderEtaItemsList from './components/PurchaseOrderEtaItemsList.vue'
 import PurchaseOrderItemsList from './components/PurchaseOrderItemsList.vue'
 
-/** 采购单 列表 */
+/** 采购单管理NEW 列表 */
 defineOptions({ name: 'PurchaseOrder' })
 
 const message = useMessage() // 消息弹窗
@@ -230,7 +223,7 @@ const handleExport = async () => {
     // 发起导出
     exportLoading.value = true
     const data = await PurchaseOrderApi.exportPurchaseOrder(queryParams)
-    download.excel(data, '采购单.xls')
+    download.excel(data, '采购单管理NEW.xls')
   } catch {
   } finally {
     exportLoading.value = false

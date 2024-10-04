@@ -13,8 +13,19 @@
       <el-table-column label="id" align="center" prop="id" />
       <el-table-column label="请购单编码" align="center" prop="reqPurchaseCode" />
        <el-table-column label="产品编码" align="center" prop="prodCode" />
-      <el-table-column label="采购数量" align="center" prop="purchaseQuantity" />
-      <el-table-column label="采购单价" align="center" prop="unitPrice" />
+      <el-table-column label="预期交付数量" align="center" prop="exceptQuantity" />
+      <el-table-column
+        label="预期交付时间"
+        align="center"
+        prop="exceptDate"
+        :formatter="dateFormatter"
+        width="180px"
+      />
+      <el-table-column label="来源编码" align="center" prop="sourceCode">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.PURCHASE_SOURCE_CODE" :value="scope.row.sourceCode" />
+        </template>
+      </el-table-column>
       <el-table-column
         label="创建时间"
         align="center"
@@ -52,12 +63,13 @@
     />
   </ContentWrap>
     <!-- 表单弹窗：添加/修改 -->
-    <PurchaseOrderItemsForm ref="formRef" @success="getList" />
+    <PurchaseOrderEtaItemsForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="ts">
+import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { PurchaseOrderApi } from '@/api/cacerp/purchase/purchaseOrder'
-import PurchaseOrderItemsForm from './PurchaseOrderItemsForm.vue'
+import PurchaseOrderEtaItemsForm from './PurchaseOrderEtaItemsForm.vue'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -91,7 +103,7 @@ watch(
 const getList = async () => {
   loading.value = true
   try {
-    const data = await PurchaseOrderApi.getPurchaseOrderItemsPage(queryParams)
+    const data = await PurchaseOrderApi.getPurchaseOrderEtaItemsPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -121,7 +133,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await PurchaseOrderApi.deletePurchaseOrderItems(id)
+    await PurchaseOrderApi.deletePurchaseOrderEtaItems(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()

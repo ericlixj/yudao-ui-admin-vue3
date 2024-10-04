@@ -41,6 +41,12 @@ export const PurchaseReqOrderApi = {
     return await request.download({ url: `/cacerp/purchase/purchase-req-order/export-excel`, params })
   },
 
+  // 请购单编码下拉使用
+  getPurchaseReqOrderSimpleList: async () => {
+    return await request.get({ url: `/cacerp/purchase/purchase-req-order/getPurchaseReqOrderSimpleList`})
+  },
+
+
 // ==================== 子表（请购单产品明细） ====================
 
   // 获得请购单产品明细分页

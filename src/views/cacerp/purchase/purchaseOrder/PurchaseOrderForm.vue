@@ -8,7 +8,20 @@
       v-loading="formLoading"
     >
       <el-form-item label="请购单编码" prop="reqPurchaseCode">
-        <el-input v-model="formData.reqPurchaseCode" placeholder="请输入请购单编码" />
+            <el-select
+              v-model="formData.reqPurchaseCode"
+              clearable
+              filterable
+              placeholder="请选择请购单编码"
+              class="!w-1/1"
+            >
+              <el-option
+                v-for="item in reqPurchaseCodeList"
+                :key="item.reqPurchaseCode"
+                :label="item.reqPurchaseCode"
+                :value="item.reqPurchaseCode"
+              />
+            </el-select>
       </el-form-item>
       <el-form-item label="采购单编码" prop="poNum">
         <el-input v-model="formData.poNum" placeholder="请输入采购单编码" />
@@ -18,21 +31,18 @@
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
-            :label="dict.value"
+            :value="dict.value"
           >
             {{ dict.label }}
           </el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="扩展信息" prop="extInfo">
-        <el-input v-model="formData.extInfo" placeholder="请输入扩展信息" />
-      </el-form-item>
-      <el-form-item label="运输日期" prop="shipmentDate">
+      <el-form-item label="预期运输时间" prop="shipmentDate">
         <el-date-picker
           v-model="formData.shipmentDate"
           type="date"
           value-format="x"
-          placeholder="选择运输日期"
+          placeholder="选择预期运输时间"
         />
       </el-form-item>
     </el-form>
@@ -45,9 +55,10 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { PurchaseOrderApi, PurchaseOrderVO } from '@/api/cacerp/purchase/purchaseOrder'
+import {PurchaseReqOrderApi} from '@/api/cacerp/purchase/purchaseReqOrder'
 import { CommonStatusEnum } from '@/utils/constants'
 
-/** 采购单 表单 */
+/** 采购单管理NEW 表单 */
 defineOptions({ name: 'PurchaseOrderForm' })
 
 const { t } = useI18n() // 国际化
@@ -62,16 +73,17 @@ const formData = ref({
   reqPurchaseCode: undefined,
   poNum: undefined,
   status: CommonStatusEnum.ENABLE,
-  extInfo: undefined,
   shipmentDate: undefined
 })
 const formRules = reactive({
   reqPurchaseCode: [{ required: true, message: '请购单编码不能为空', trigger: 'blur' }],
   poNum: [{ required: true, message: '采购单编码不能为空', trigger: 'blur' }],
-  status: [{ required: true, message: '请购单状态不能为空', trigger: 'blur' }],
-  extInfo: [{ required: true, message: '扩展信息不能为空', trigger: 'blur' }]
+  status: [{ required: true, message: '请购单状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+
+/** 请购单下拉框 */
+const reqPurchaseCodeList = ref<PurchaseReqOrderVO[]>([]) // 请购单列表
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -88,6 +100,8 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+
+  reqPurchaseCodeList.value = await PurchaseReqOrderApi.getPurchaseReqOrderSimpleList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -122,7 +136,6 @@ const resetForm = () => {
     reqPurchaseCode: undefined,
     poNum: undefined,
     status: CommonStatusEnum.ENABLE,
-    extInfo: undefined,
     shipmentDate: undefined
   }
   formRef.value?.resetFields()

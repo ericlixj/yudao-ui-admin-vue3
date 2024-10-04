@@ -13,11 +13,26 @@
        <el-form-item label="产品编码" prop="prodCode">
         <el-input v-model="formData.prodCode" placeholder="请输入产品编码" />
       </el-form-item>
-      <el-form-item label="采购数量" prop="purchaseQuantity">
-        <el-input v-model="formData.purchaseQuantity" placeholder="请输入采购数量" />
+      <el-form-item label="预期交付数量" prop="exceptQuantity">
+        <el-input v-model="formData.exceptQuantity" placeholder="请输入预期交付数量" />
       </el-form-item>
-      <el-form-item label="采购单价" prop="unitPrice">
-        <el-input v-model="formData.unitPrice" placeholder="请输入采购单价" />
+      <el-form-item label="预期交付时间" prop="exceptDate">
+        <el-date-picker
+          v-model="formData.exceptDate"
+          type="date"
+          value-format="x"
+          placeholder="选择预期交付时间"
+        />
+      </el-form-item>
+      <el-form-item label="来源编码" prop="sourceCode">
+        <el-select v-model="formData.sourceCode" placeholder="请选择来源编码">
+          <el-option
+            v-for="dict in getStrDictOptions(DICT_TYPE.PURCHASE_SOURCE_CODE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -27,6 +42,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
+import { getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import { PurchaseOrderApi } from '@/api/cacerp/purchase/purchaseOrder'
 
 const { t } = useI18n() // 国际化
@@ -41,15 +57,17 @@ const formData = ref({
   reqPurchaseCode: undefined,
   poNum: undefined,
   prodCode: undefined,
-  purchaseQuantity: undefined,
-  unitPrice: undefined
+  exceptQuantity: undefined,
+  exceptDate: undefined,
+  sourceCode: undefined
 })
 const formRules = reactive({
   reqPurchaseCode: [{ required: true, message: '请购单编码不能为空', trigger: 'blur' }],
   poNum: [{ required: true, message: '采购单编码不能为空', trigger: 'blur' }],
   prodCode: [{ required: true, message: '产品编码不能为空', trigger: 'blur' }],
-  purchaseQuantity: [{ required: true, message: '采购数量不能为空', trigger: 'blur' }],
-  unitPrice: [{ required: true, message: '采购单价不能为空', trigger: 'blur' }]
+  exceptQuantity: [{ required: true, message: '预期交付数量不能为空', trigger: 'blur' }],
+  exceptDate: [{ required: true, message: '预期交付时间不能为空', trigger: 'blur' }],
+  sourceCode: [{ required: true, message: '来源编码不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -64,7 +82,7 @@ const open = async (type: string, id?: number, poNum: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await PurchaseOrderApi.getPurchaseOrderItems(id)
+      formData.value = await PurchaseOrderApi.getPurchaseOrderEtaItems(id)
     } finally {
       formLoading.value = false
     }
@@ -82,10 +100,10 @@ const submitForm = async () => {
   try {
     const data = formData.value
     if (formType.value === 'create') {
-      await PurchaseOrderApi.createPurchaseOrderItems(data)
+      await PurchaseOrderApi.createPurchaseOrderEtaItems(data)
       message.success(t('common.createSuccess'))
     } else {
-      await PurchaseOrderApi.updatePurchaseOrderItems(data)
+      await PurchaseOrderApi.updatePurchaseOrderEtaItems(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -103,8 +121,9 @@ const resetForm = () => {
     reqPurchaseCode: undefined,
     poNum: undefined,
     prodCode: undefined,
-    purchaseQuantity: undefined,
-    unitPrice: undefined
+    exceptQuantity: undefined,
+    exceptDate: undefined,
+    sourceCode: undefined
   }
   formRef.value?.resetFields()
 }
