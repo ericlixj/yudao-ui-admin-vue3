@@ -63,7 +63,7 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const props = defineProps<{
-  poNum?: number // 采购单编码（主表的关联字段）
+  poNum?: string // 采购单编码（主表的关联字段）
 }>()
 const loading = ref(false) // 列表的加载中
 const list = ref([]) // 列表的数据
@@ -77,7 +77,7 @@ const queryParams = reactive({
 /** 监听主表的关联字段的变化，加载对应的子表数据 */
 watch(
   () => props.poNum,
-  (val: number) => {
+  (val: string) => {
     if (!val) {
       return
     }
@@ -109,7 +109,7 @@ const handleQuery = () => {
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   if (!props.poNum) {
-    message.error('请选择一个采购单管理NEW')
+    message.error('请选择一个采购单管理')
     return
   }
   formRef.value.open(type, id, props.poNum)

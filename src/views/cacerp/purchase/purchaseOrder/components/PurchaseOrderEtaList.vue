@@ -21,11 +21,6 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="来源编码" align="center" prop="sourceCode">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.PURCHASE_SOURCE_CODE" :value="scope.row.sourceCode" />
-        </template>
-      </el-table-column>
       <el-table-column
         label="创建时间"
         align="center"
@@ -63,19 +58,18 @@
     />
   </ContentWrap>
     <!-- 表单弹窗：添加/修改 -->
-    <PurchaseOrderEtaItemsForm ref="formRef" @success="getList" />
+    <PurchaseOrderEtaForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="ts">
-import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { PurchaseOrderApi } from '@/api/cacerp/purchase/purchaseOrder'
-import PurchaseOrderEtaItemsForm from './PurchaseOrderEtaItemsForm.vue'
+import PurchaseOrderEtaForm from './PurchaseOrderEtaForm.vue'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const props = defineProps<{
-  poNum?: number // 采购单编码（主表的关联字段）
+  poNum?: string // 采购单编码（主表的关联字段）
 }>()
 const loading = ref(false) // 列表的加载中
 const list = ref([]) // 列表的数据
@@ -89,7 +83,7 @@ const queryParams = reactive({
 /** 监听主表的关联字段的变化，加载对应的子表数据 */
 watch(
   () => props.poNum,
-  (val: number) => {
+  (val: string) => {
     if (!val) {
       return
     }
@@ -103,7 +97,7 @@ watch(
 const getList = async () => {
   loading.value = true
   try {
-    const data = await PurchaseOrderApi.getPurchaseOrderEtaItemsPage(queryParams)
+    const data = await PurchaseOrderApi.getPurchaseOrderEtaPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -133,7 +127,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await PurchaseOrderApi.deletePurchaseOrderEtaItems(id)
+    await PurchaseOrderApi.deletePurchaseOrderEta(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()

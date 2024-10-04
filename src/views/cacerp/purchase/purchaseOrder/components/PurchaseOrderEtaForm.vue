@@ -24,16 +24,6 @@
           placeholder="选择预期交付时间"
         />
       </el-form-item>
-      <el-form-item label="来源编码" prop="sourceCode">
-        <el-select v-model="formData.sourceCode" placeholder="请选择来源编码">
-          <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.PURCHASE_SOURCE_CODE)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
@@ -42,7 +32,6 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import { PurchaseOrderApi } from '@/api/cacerp/purchase/purchaseOrder'
 
 const { t } = useI18n() // 国际化
@@ -58,21 +47,19 @@ const formData = ref({
   poNum: undefined,
   prodCode: undefined,
   exceptQuantity: undefined,
-  exceptDate: undefined,
-  sourceCode: undefined
+  exceptDate: undefined
 })
 const formRules = reactive({
   reqPurchaseCode: [{ required: true, message: '请购单编码不能为空', trigger: 'blur' }],
   poNum: [{ required: true, message: '采购单编码不能为空', trigger: 'blur' }],
   prodCode: [{ required: true, message: '产品编码不能为空', trigger: 'blur' }],
   exceptQuantity: [{ required: true, message: '预期交付数量不能为空', trigger: 'blur' }],
-  exceptDate: [{ required: true, message: '预期交付时间不能为空', trigger: 'blur' }],
-  sourceCode: [{ required: true, message: '来源编码不能为空', trigger: 'change' }]
+  exceptDate: [{ required: true, message: '预期交付时间不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
-const open = async (type: string, id?: number, poNum: number) => {
+const open = async (type: string, id?: number, poNum: string) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -82,7 +69,7 @@ const open = async (type: string, id?: number, poNum: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await PurchaseOrderApi.getPurchaseOrderEtaItems(id)
+      formData.value = await PurchaseOrderApi.getPurchaseOrderEta(id)
     } finally {
       formLoading.value = false
     }
@@ -100,10 +87,10 @@ const submitForm = async () => {
   try {
     const data = formData.value
     if (formType.value === 'create') {
-      await PurchaseOrderApi.createPurchaseOrderEtaItems(data)
+      await PurchaseOrderApi.createPurchaseOrderEta(data)
       message.success(t('common.createSuccess'))
     } else {
-      await PurchaseOrderApi.updatePurchaseOrderEtaItems(data)
+      await PurchaseOrderApi.updatePurchaseOrderEta(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -122,8 +109,7 @@ const resetForm = () => {
     poNum: undefined,
     prodCode: undefined,
     exceptQuantity: undefined,
-    exceptDate: undefined,
-    sourceCode: undefined
+    exceptDate: undefined
   }
   formRef.value?.resetFields()
 }

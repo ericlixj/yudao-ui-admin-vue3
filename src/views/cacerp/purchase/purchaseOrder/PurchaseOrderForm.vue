@@ -7,6 +7,24 @@
       label-width="100px"
       v-loading="formLoading"
     >
+      <el-form-item label="供应商" prop="supplierId">
+            <el-select
+              v-model="formData.supplierId"
+              clearable
+              filterable
+              placeholder="请选择供应商"
+              class="!w-1/1"
+              @change="generatePurchaseCode"
+              :disabled="supplierDisabled"
+            >
+              <el-option
+                v-for="item in supplierList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
+      </el-form-item>
       <el-form-item label="请购单编码" prop="reqPurchaseCode">
             <el-select
               v-model="formData.reqPurchaseCode"
@@ -14,6 +32,7 @@
               filterable
               placeholder="请选择请购单编码"
               class="!w-1/1"
+              :disabled="reqPurchaseCodeDisabled"
             >
               <el-option
                 v-for="item in reqPurchaseCodeList"
@@ -24,7 +43,7 @@
             </el-select>
       </el-form-item>
       <el-form-item label="采购单编码" prop="poNum">
-        <el-input v-model="formData.poNum" placeholder="请输入采购单编码" />
+        <el-input v-model="formData.poNum" placeholder="系统自动生成..." disabled/>
       </el-form-item>
       <el-form-item label="请购单状态" prop="status">
         <el-radio-group v-model="formData.status">
@@ -57,8 +76,9 @@ import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { PurchaseOrderApi, PurchaseOrderVO } from '@/api/cacerp/purchase/purchaseOrder'
 import {PurchaseReqOrderApi} from '@/api/cacerp/purchase/purchaseReqOrder'
 import { CommonStatusEnum } from '@/utils/constants'
+import { CacErpSupplierApi, CacErpSupplierVO } from '@/api/cacerp/purchase/supplier'
 
-/** 采购单管理NEW 表单 */
+/** 采购单管理 表单 */
 defineOptions({ name: 'PurchaseOrderForm' })
 
 const { t } = useI18n() // 国际化
@@ -70,20 +90,25 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
+  supplierId: undefined,
   reqPurchaseCode: undefined,
   poNum: undefined,
   status: CommonStatusEnum.ENABLE,
   shipmentDate: undefined
 })
 const formRules = reactive({
+  supplierId: [{ required: true, message: '供应商不能为空', trigger: 'blur' }],
   reqPurchaseCode: [{ required: true, message: '请购单编码不能为空', trigger: 'blur' }],
   poNum: [{ required: true, message: '采购单编码不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '请购单状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+const supplierDisabled = ref(false)
+const reqPurchaseCodeDisabled = ref(false)
 
 /** 请购单下拉框 */
 const reqPurchaseCodeList = ref<PurchaseReqOrderVO[]>([]) // 请购单列表
+const supplierList = ref<CacErpSupplierVO[]>([]) // 供应商列表
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -99,9 +124,15 @@ const open = async (type: string, id?: number) => {
     } finally {
       formLoading.value = false
     }
+    supplierDisabled.value = true
+    reqPurchaseCodeDisabled.value = true
+  }else{
+    supplierDisabled.value = false
+    reqPurchaseCodeDisabled.value = false
   }
 
   reqPurchaseCodeList.value = await PurchaseReqOrderApi.getPurchaseReqOrderSimpleList()
+  supplierList.value = await CacErpSupplierApi.getSupplierSimpleList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -133,6 +164,7 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
+    supplierId: undefined,
     reqPurchaseCode: undefined,
     poNum: undefined,
     status: CommonStatusEnum.ENABLE,
@@ -140,4 +172,24 @@ const resetForm = () => {
   }
   formRef.value?.resetFields()
 }
+
+/** 生成请购单编码 */
+const generatePurchaseCode = () => {
+  const currentDate = new Date();
+  // 获取当前年份后两位
+  const year = currentDate.getFullYear().toString();
+  // 获取当前日期（格式：MMDD）
+  const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+  const day = String(currentDate.getDate()).padStart(2, '0');
+
+  // 查找当前选择的 supplierId 对应的供应商名称
+  const selectedSupplier = supplierList.value.find(supplier => supplier.id === formData.value.supplierId);
+
+  // 如果选择了供应商，生成采购单编码
+  if (selectedSupplier) {
+    const supplierName = selectedSupplier.name;
+    formData.value.poNum = `PO-${supplierName}-${year}${month}${day}-{自动流水号}`;
+  }
+}
+
 </script>

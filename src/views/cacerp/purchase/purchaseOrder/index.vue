@@ -76,9 +76,10 @@
       highlight-current-row
       @current-change="handleCurrentChange"
     >
-      <el-table-column label="id" align="center" prop="id" />
-      <el-table-column label="请购单编码" align="center" prop="reqPurchaseCode" />
-      <el-table-column label="采购单编码" align="center" prop="poNum" />
+      <el-table-column label="id" align="center" prop="id" width="50px"/>
+      <el-table-column label="供应商" align="center" prop="supplierName" />
+      <el-table-column label="请购单编码" align="center" prop="reqPurchaseCode" width="170px"/>
+      <el-table-column label="采购单编码" align="center" prop="poNum" width="190px"/>
       <el-table-column label="请购单状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
@@ -132,12 +133,12 @@
   <PurchaseOrderForm ref="formRef" @success="getList" />
   <!-- 子表的列表 -->
   <ContentWrap>
-    <el-tabs model-value="purchaseOrderEtaItems">
+    <el-tabs model-value="purchaseOrderItems">
       <el-tab-pane label="采购单产品明细" name="purchaseOrderItems">
-        <PurchaseOrderItemsList :po-num="currentRow.id" />
+        <PurchaseOrderItemsList :po-num="currentRow.poNum" />
       </el-tab-pane>
-      <el-tab-pane label="采购单交付批次明细" name="purchaseOrderEtaItems">
-        <PurchaseOrderEtaItemsList :po-num="currentRow.id" />
+      <el-tab-pane label="采购单交付批次" name="purchaseOrderEta">
+        <PurchaseOrderEtaList :po-num="currentRow.poNum" />
       </el-tab-pane>
     </el-tabs>
   </ContentWrap>
@@ -149,10 +150,10 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { PurchaseOrderApi, PurchaseOrderVO } from '@/api/cacerp/purchase/purchaseOrder'
 import PurchaseOrderForm from './PurchaseOrderForm.vue'
-import PurchaseOrderEtaItemsList from './components/PurchaseOrderEtaItemsList.vue'
+import PurchaseOrderEtaList from './components/PurchaseOrderEtaList.vue'
 import PurchaseOrderItemsList from './components/PurchaseOrderItemsList.vue'
 
-/** 采购单管理NEW 列表 */
+/** 采购单管理 列表 */
 defineOptions({ name: 'PurchaseOrder' })
 
 const message = useMessage() // 消息弹窗
@@ -164,8 +165,9 @@ const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
+  supplierId: undefined,
   reqPurchaseCode: undefined,
-  poNum: undefined,
+  poNum: '',
   status: undefined,
   shipmentDate: []
 })
@@ -223,7 +225,7 @@ const handleExport = async () => {
     // 发起导出
     exportLoading.value = true
     const data = await PurchaseOrderApi.exportPurchaseOrder(queryParams)
-    download.excel(data, '采购单管理NEW.xls')
+    download.excel(data, '采购单管理.xls')
   } catch {
   } finally {
     exportLoading.value = false
