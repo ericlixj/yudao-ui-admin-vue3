@@ -64,7 +64,7 @@
       @current-change="handleCurrentChange"
     >
       <el-table-column label="id" align="center" prop="id" />
-      <el-table-column label="请购单编码" align="center" prop="reqPurchaseCode" />
+      <el-table-column label="请购单编码" align="center" prop="reqPurchaseCode" width="175px" />
       <el-table-column label="请购单状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />

@@ -63,7 +63,9 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const props = defineProps<{
-  poNum?: string // 采购单编码（主表的关联字段）
+  poNum?: string,
+  supplierId?: string,
+  reqPurchaseCode?: string,
 }>()
 const loading = ref(false) // 列表的加载中
 const list = ref([]) // 列表的数据
@@ -112,7 +114,7 @@ const openForm = (type: string, id?: number) => {
     message.error('请选择一个采购单管理')
     return
   }
-  formRef.value.open(type, id, props.poNum)
+  formRef.value.open(type, id, props.poNum, props.supplierId, props.reqPurchaseCode)
 }
 
 /** 删除按钮操作 */

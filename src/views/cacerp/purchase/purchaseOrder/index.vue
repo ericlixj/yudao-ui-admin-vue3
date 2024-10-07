@@ -80,7 +80,7 @@
       <el-table-column label="供应商" align="center" prop="supplierName" />
       <el-table-column label="请购单编码" align="center" prop="reqPurchaseCode" width="170px"/>
       <el-table-column label="采购单编码" align="center" prop="poNum" width="190px"/>
-      <el-table-column label="请购单状态" align="center" prop="status">
+      <el-table-column label="采购单状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
@@ -135,7 +135,7 @@
   <ContentWrap>
     <el-tabs model-value="purchaseOrderItems">
       <el-tab-pane label="采购单产品明细" name="purchaseOrderItems">
-        <PurchaseOrderItemsList :po-num="currentRow.poNum" />
+        <PurchaseOrderItemsList :po-num="currentRow.poNum" :supplierId="currentRow.supplierId" :reqPurchaseCode="currentRow.reqPurchaseCode"/>
       </el-tab-pane>
       <el-tab-pane label="采购单交付批次" name="purchaseOrderEta">
         <PurchaseOrderEtaList :po-num="currentRow.poNum" />

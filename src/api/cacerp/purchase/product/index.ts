@@ -22,6 +22,9 @@ export const ProductApi = {
   getProductPage: async (params: any) => {
     return await request.get({ url: `/cacerp/purchase/product/page`, params })
   },
+  getProdList: async (params: any) => {
+    return await request.get({ url: `/cacerp/purchase/product/getProdList`, params })
+  },
 
   // 查询产品管理详情
   getProduct: async (id: number) => {

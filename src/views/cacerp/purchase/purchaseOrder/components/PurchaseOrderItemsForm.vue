@@ -8,13 +8,30 @@
       v-loading="formLoading"
     >
       <el-form-item label="请购单编码" prop="reqPurchaseCode">
-        <el-input v-model="formData.reqPurchaseCode" placeholder="请输入请购单编码" />
+        <el-input v-model="formData.reqPurchaseCode" placeholder="请输入请购单编码" disabled/>
       </el-form-item>
        <el-form-item label="产品编码" prop="prodCode">
-        <el-input v-model="formData.prodCode" placeholder="请输入产品编码" />
+        <el-select
+          v-model="formData.prodCode"
+          clearable
+          filterable
+          placeholder="请选择产品"
+          class="!w-1/1"
+          @change="onProdCodeChange"
+        >
+          <el-option
+            v-for="item in prodList"
+            :key="item.prodCode"
+            :label="item.prodCode"
+            :value="item.prodCode"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="产品名称" prop="prodName">
+        <el-input v-model="formData.prodName" placeholder="请输入产品名称" disabled/>
       </el-form-item>
       <el-form-item label="采购数量" prop="purchaseQuantity">
-        <el-input v-model="formData.purchaseQuantity" placeholder="请输入采购数量" />
+        <el-input v-model="formData.purchaseQuantity" placeholder="请输入采购数量" disabled/>
       </el-form-item>
       <el-form-item label="采购单价" prop="unitPrice">
         <el-input v-model="formData.unitPrice" placeholder="请输入采购单价" />
@@ -28,6 +45,7 @@
 </template>
 <script setup lang="ts">
 import { PurchaseOrderApi } from '@/api/cacerp/purchase/purchaseOrder'
+import { ProductApi, ProductVO } from '@/api/cacerp/purchase/product'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -52,13 +70,14 @@ const formRules = reactive({
   unitPrice: [{ required: true, message: '采购单价不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-
+const prodList = ref<ProductVO[]>([]) // 供应商列表
 /** 打开弹窗 */
-const open = async (type: string, id?: number, poNum: string) => {
+const open = async (type: string, id?: number, poNum: string, supplierId: string, reqPurchaseCode: string) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
+  formData.value.reqPurchaseCode = reqPurchaseCode
   formData.value.poNum = poNum
   // 修改时，设置数据
   if (id) {
@@ -69,6 +88,12 @@ const open = async (type: string, id?: number, poNum: string) => {
       formLoading.value = false
     }
   }
+  prodList.value = await ProductApi.getProdList({
+    reqPurchaseCode: reqPurchaseCode,
+    supplierId: supplierId,
+
+
+  })
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -108,4 +133,15 @@ const resetForm = () => {
   }
   formRef.value?.resetFields()
 }
+
+/** 当产品编码变化时，更新产品相关信息 */
+const onProdCodeChange = (prodCode: string) => {
+  const selectedProduct = prodList.value.find(product => product.prodCode === prodCode)
+  if (selectedProduct) {
+    formData.value.prodName = selectedProduct.name       // 自动带出产品名称
+    formData.value.purchaseQuantity = selectedProduct.summaryPlanCount // 假设有默认数量字段
+    formData.value.unitPrice = selectedProduct.purchasePrice // 自动带出采购价格
+  }
+}
+
 </script>
